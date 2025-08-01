@@ -1,8 +1,8 @@
 import React, { useRef, useEffect } from 'react';
-import { useFeedback } from '../contexts/FeedbackContext';
+import { useFeedbackStats } from '../hooks/useFeedbackStats';
 
 const Statistics = () => {
-  const { good, neutral, bad, total, positivePercentage } = useFeedback();
+  const { good, neutral, bad, total, positivePercentage } = useFeedbackStats();
   
   const totalRef = useRef(null);
 

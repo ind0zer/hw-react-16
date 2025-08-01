@@ -1,6 +1,43 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useReducer } from 'react';
 
 const FeedbackContext = createContext();
+
+const initialState = {
+  good: 0,
+  neutral: 0,
+  bad: 0,
+};
+
+const actionTypes = {
+  INCREMENT_GOOD: 'INCREMENT_GOOD',
+  INCREMENT_NEUTRAL: 'INCREMENT_NEUTRAL',
+  INCREMENT_BAD: 'INCREMENT_BAD',
+  RESET_FEEDBACK: 'RESET_FEEDBACK',
+};
+
+const feedbackReducer = (state, action) => {
+  switch (action.type) {
+    case actionTypes.INCREMENT_GOOD:
+      return {
+        ...state,
+        good: state.good + 1,
+      };
+    case actionTypes.INCREMENT_NEUTRAL:
+      return {
+        ...state,
+        neutral: state.neutral + 1,
+      };
+    case actionTypes.INCREMENT_BAD:
+      return {
+        ...state,
+        bad: state.bad + 1,
+      };
+    case actionTypes.RESET_FEEDBACK:
+      return initialState;
+    default:
+      return state;
+  }
+};
 
 export const useFeedback = () => {
   const context = useContext(FeedbackContext);
@@ -11,45 +48,48 @@ export const useFeedback = () => {
 };
 
 export const FeedbackProvider = ({ children }) => {
-  const [good, setGood] = useState(0);
-  const [neutral, setNeutral] = useState(0);
-  const [bad, setBad] = useState(0);
+  const [state, dispatch] = useReducer(feedbackReducer, initialState);
 
   const options = ['good', 'neutral', 'bad'];
 
   const handleFeedback = (option) => {
     switch (option) {
       case 'good':
-        setGood(prev => prev + 1);
+        dispatch({ type: actionTypes.INCREMENT_GOOD });
         break;
       case 'neutral':
-        setNeutral(prev => prev + 1);
+        dispatch({ type: actionTypes.INCREMENT_NEUTRAL });
         break;
       case 'bad':
-        setBad(prev => prev + 1);
+        dispatch({ type: actionTypes.INCREMENT_BAD });
         break;
       default:
         break;
     }
   };
 
+  const resetFeedback = () => {
+    dispatch({ type: actionTypes.RESET_FEEDBACK });
+  };
+
   const countTotalFeedback = () => {
-    return good + neutral + bad;
+    return state.good + state.neutral + state.bad;
   };
 
   const countPositiveFeedbackPercentage = () => {
     const total = countTotalFeedback();
-    return total ? Math.round((good / total) * 100) : 0;
+    return total ? Math.round((state.good / total) * 100) : 0;
   };
 
   const value = {
-    good,
-    neutral,
-    bad,
+    good: state.good,
+    neutral: state.neutral,
+    bad: state.bad,
     options,
     total: countTotalFeedback(),
     positivePercentage: countPositiveFeedbackPercentage(),
-    handleFeedback
+    handleFeedback,
+    resetFeedback,
   };
 
   return (
